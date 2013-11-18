@@ -1,0 +1,6 @@
+#!/bin/sh
+#echo remove all .swp files under this folder
+for file in `find . -name "*.swp"`; do
+  #echo $file;
+  rm -f $file;
+done

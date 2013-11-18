@@ -1,0 +1,5 @@
+#!/bin/bash
+#
+# remove certain file recursively
+#
+find . -name "$1" | xargs rm
