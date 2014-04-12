@@ -16,10 +16,10 @@ if len(sys.argv) <= 1:
 
     Usage:
 
-        cn2utf8.py xxx.txt
+        gb2utf8.py xxx.txt
           - convert all the files
 
-        cn2utf8.py *
+        gb2utf8.py *
           - convert all the files
 
     """
