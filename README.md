@@ -20,7 +20,7 @@ Some DIY Mac Command Line Scripts
 **rmr**
   - remove a given file pattern under current folder, recursively
 
-**flat.py**
+**flat**
   - flatter all the files under sub folders to current folder
 
 **synology.py**

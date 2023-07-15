@@ -1,0 +1,40 @@
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Epoch timestamp to UTC and local time
+"""
+
+import time
+from datetime import datetime
+
+
+def print_dummy(timestamp):
+    diff = int(time.time()) - timestamp
+    print()
+    if diff == 0:
+        print('  ---------- now ----------')
+    print('  Utc    :', datetime.utcfromtimestamp(timestamp))
+    print('  Local  :', datetime.fromtimestamp(timestamp))
+    print('  Epoch  :', timestamp)
+    if diff != 0:
+        print('  to now :', diff, 'seconds  | ', diff / 3600.0, 'hours')
+    print()
+    print()
+
+
+def start_loop():
+    while True:
+        raw = input('input timestamp(enter to quit): ')
+        if raw.isdigit():
+            timestamp = int(raw)
+            if timestamp >= 2**32:
+                timestamp = timestamp / 1000
+        else:
+            return
+        print_dummy(timestamp)
+
+
+print_dummy(int(time.time()))
+start_loop()
+print_dummy(int(time.time()))

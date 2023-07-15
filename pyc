@@ -1,9 +1,5 @@
 #!/bin/sh
-#
-# remove all .pyc files under current folder
-#
 
-for file in `find . -name "*.pyc"`; do
-  #echo $file;
-  rm -f $file;
-done
+"""remove all .pyc files under current folder"""
+
+find . -name "*.pyc" -type f -delete

@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -22,31 +22,39 @@ from os import path
 import sys
 import re
 
-FOLDER_IGNORE_LIST=set(".svn .hg .git".split())
 
-def wildchar_to_regex(str):
-    if not str: return ''
-    return str.replace('.', '\\.').replace('*', '.*').replace('?', '.?')
+FOLDER_IGNORE_LIST = set(".svn .hg .git".split())
 
-def folder_in_ignore_list(l):
-    for w in l.split(os.sep):
-        if w in FOLDER_IGNORE_LIST:
+
+def wildchar_to_regex(wildchar):
+    if not wildchar:
+        return ''
+    return wildchar.replace('.', '\\.').replace('*', '.*').replace('?', '.?')
+
+
+def folder_in_ignore_list(ignore_list):
+    for ignore in ignore_list.split(os.sep):
+        if ignore in FOLDER_IGNORE_LIST:
             return True
     return False
 
-workdir = os.getcwd()
-pattern = ".*"
-if len(sys.argv) > 1:
-    pattern = wildchar_to_regex(sys.argv[1])
-if len(sys.argv) > 2:
-    workdir = sys.argv[2]
 
-for root, dirs, files in os.walk(workdir):
-    if folder_in_ignore_list(root):
-        continue
-    list = [path.join(root, dir, "") for dir in dirs]
-    list += [path.join(root, file) for file in files]
-    for l in list:
-        if re.search(pattern, l):
-            print l
+def main():
+    workdir = os.getcwd()
+    pattern = ".*"
+    if len(sys.argv) > 1:
+        pattern = wildchar_to_regex(sys.argv[1])
+    if len(sys.argv) > 2:
+        workdir = sys.argv[2]
 
+    for root, dirs, files in os.walk(workdir):
+        if folder_in_ignore_list(root):
+            continue
+        full_paths = [path.join(root, dir, "") for dir in dirs]
+        full_paths += [path.join(root, file) for file in files]
+        for full_path in full_paths:
+            if re.search(pattern, full_path):
+                print(full_path)
+
+
+main()

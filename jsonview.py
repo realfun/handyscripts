@@ -15,11 +15,16 @@ import json
 
 import sys
 
-if len(sys.argv) <= 1:
-    raw = ''.join(sys.stdin.readlines())
-else:
-    with open(sys.argv[1], 'rb') as f:
-        raw = f.read()
 
-obj = json.loads(raw)
-print json.dumps(obj, indent=2)
+def main():
+    if len(sys.argv) <= 1:
+        raw = ''.join(sys.stdin.readlines())
+    else:
+        with open(sys.argv[1], 'rb') as file:
+            raw = file.read()
+
+    obj = json.loads(raw)
+    print(json.dumps(obj, indent=2))
+
+
+main()
