@@ -24,7 +24,7 @@ Some DIY Mac Command Line Scripts
   - flatter all the files under sub folders to current folder
 
 **synology.py**
-  - command line to scan for synology servers
+  - command line to scan for synology servers locally, update the config for your ip range
 
 **jsonview.py**
   - handy tool to view json in pretty format
