@@ -4,6 +4,6 @@
 
 for var in "$@"
 do
-  magick convert -resize 800x600 "$var" "resized_$var"
+  convert -resize 800x600 "$var" "$(dirname $var)/resized_$(basename $var)"
 done
 
