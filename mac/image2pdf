@@ -1,0 +1,9 @@
+#!/bin/sh
+# This script resizes all the images in the current directory to designated size
+# brew install imagemagick
+
+for var in "$@"
+do
+  convert -resize 1600x1200 "$var" "$var.pdf"
+done
+
