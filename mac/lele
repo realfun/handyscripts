@@ -1,0 +1,11 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+from datetime import *
+
+birthday = datetime(2008,5,13)
+now = datetime.now()
+diff = now - birthday
+days = diff.days
+print "%04dtian" % days
+print days/365, "years, and", days%365/30, "months"
+

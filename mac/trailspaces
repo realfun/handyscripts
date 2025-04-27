@@ -1,0 +1,93 @@
+#!/bin/bash
+
+# Script to remove trailing spaces from source code files
+
+# Comprehensive list of source code file extensions to process
+SOURCE_EXTENSIONS=(
+    # C and C++ family
+    "c" "h" "cpp" "hpp" "cc" "cxx" "hxx" "c++" "h++" "m" "mm"
+    # Java family
+    "java" "scala" "kt" "groovy" "gradle"
+    # JavaScript/TypeScript family
+    "js" "jsx" "ts" "tsx" "json" "mjs" "cjs" "vue" "svelte"
+    # Python family
+    "py" "pyx" "pyi" "pyw" "ipynb" "rpy"
+    # Ruby family
+    "rb" "rake" "gemspec" "erb" "slim" "haml"
+    # PHP family
+    "php" "phtml" "php3" "php4" "php5" "php7" "phps" "phar" "inc"
+    # Web files
+    "html" "htm" "css" "sass" "scss" "less" "xhtml" "shtml" "dhtml" "webp"
+    # Shell scripts
+    "sh" "bash" "zsh" "ksh" "csh" "fish" "bats" "tmux" "ps1" "psm1"
+    # Config files
+    "xml" "yml" "yaml" "toml" "ini" "conf" "cfg" "rc" "properties" "dockerfile" "dockerignore"
+    # Go
+    "go" "mod" "sum"
+    # Rust
+    "rs" "rlib" "toml"
+    # Swift
+    "swift" "xcconfig" "pbxproj"
+    # Perl
+    "pl" "pm" "t" "pod"
+    # Lua
+    "lua"
+    # Haskell
+    "hs" "lhs" "cabal"
+    # Elixir/Erlang
+    "ex" "exs" "erl" "hrl" "beam"
+    # R
+    "r" "R" "Rmd" "Rnw"
+    # Clojure
+    "clj" "cljs" "cljc" "edn"
+    # SQL
+    "sql" "ddl" "dml"
+    # Dart
+    "dart"
+    # Kotlin
+    "kt" "kts"
+    # .NET/C#
+    "cs" "vb" "fs" "xaml" "cshtml" "vbhtml" "razor"
+    # Lisp family
+    "lisp" "cl" "el" "scm" "ss" "rkt"
+    # Misc markup/documentation
+    "md" "markdown" "rst" "tex" "adoc" "asciidoc" "wiki" "mediawiki"
+    # Build systems
+    "cmake" "make" "ninja" "bazel" "buck" "BUILD" "bzl"
+    # Other common extensions
+    "awk" "sed" "asm" "s" "d" "f" "f90" "f95" "for" "fortran" "nim" "jl"
+    "proto" "elm" "purs" "zig" "v" "ml" "mli" "sml" "idr" "agda" "coq"
+    "graphql" "gql" "prisma" "wasm" "wat" "nix" "pas" "pp" "inc"
+    # Version control and ignore files
+    "gitignore" "gitattributes" "gitconfig" "editorconfig" "hgrc" "hgignore"
+    # Misc config
+    "eslintrc" "eslintignore" "prettierrc" "stylelintrc" "babelrc"
+)
+
+# Build the find command with file extensions
+FIND_PATTERN=""
+for ext in "${SOURCE_EXTENSIONS[@]}"; do
+    if [ -z "$FIND_PATTERN" ]; then
+        FIND_PATTERN="-name \"*.$ext\""
+    else
+        FIND_PATTERN="$FIND_PATTERN -o -name \"*.$ext\""
+    fi
+done
+
+# Find all source files and remove trailing spaces
+eval "find . -type f \( $FIND_PATTERN \) -print0" | 
+    while IFS= read -r -d $'\0' file; do
+        # Skip binary files (quick check)
+        if file "$file" | grep -q "text"; then
+            echo "Processing: $file"
+            # Remove trailing whitespace and preserve file timestamp
+            temp_file=$(mktemp)
+            sed 's/[[:space:]]*$//' "$file" > "$temp_file"
+            touch -r "$file" "$temp_file"  # Preserve timestamp
+            mv "$temp_file" "$file"
+        else
+            echo "Skipping binary file: $file"
+        fi
+    done
+
+echo "All trailing spaces have been removed from source code files."

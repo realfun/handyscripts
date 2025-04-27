@@ -1,0 +1,75 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+# filename: exren.py
+
+# this script intention batch rename files
+
+def show_help():
+    print """
+    Extended renamer by realfun( http://2maomao.com/blog/ )
+    
+    Usage:
+      exren [-x] pattern replace
+    
+    Options:
+      -x: regular expression
+      pattern: the target files that going to be renamed
+      replace: the replace pattern (or regular expression replacer
+    
+    Notice:
+      if you don't specify -x,
+         the replace pattern should have the same count of * and ?
+      if you specified -x,
+         pattern string should grouped with ()
+         replace string should looks like \\1, \\2 for each group in pattern string
+    
+    Examples:
+      exren foo bar
+      exren foo'*'.txt bar'*'.doc
+      exren foo'?'.mp3 bar'?'.mp3
+      exren -x (test\d+)\.mp3 \\1.mp3
+"""
+
+import os
+from os import path
+import sys
+import re
+
+def group_pattern(ptn):
+    return ptn.replace('.', '\\.').replace('*', '(.*)').replace('?', '(.?)')
+
+def group_replace(ptn):
+    count = 1
+    while re.search('[\*\?]', ptn):
+        ptn = re.sub('[\*\?]', '\\\\' + str(count), ptn, 1)
+        count += 1
+    return ptn
+
+def main():
+    pattern = None
+    replace = None
+    if len(sys.argv) == 4 and sys.argv[1] == '-x':
+        pattern = sys.argv[2]
+        replace = sys.argv[3]
+    elif len(sys.argv) == 3:
+        pattern = group_pattern(sys.argv[1])
+        replace = group_replace(sys.argv[2])
+    else:
+        show_help()
+        return
+
+    dir = os.getcwd()
+    count = 0
+    for file in os.listdir(dir):
+        if re.match(pattern, file):
+            count += 1
+            new_file = re.sub(pattern, replace, file)
+            print "  %s \t-> \t%s" % (file, new_file)
+            cmd = 'ren "%s" "%s"' % (file, new_file)
+            os.system(cmd)
+    print
+    print "== Renamed %d files ==" % count
+    print
+
+main()
+
