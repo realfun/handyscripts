@@ -2,6 +2,17 @@
 
 # Script to remove trailing spaces from source code files
 
+# Parse command line options
+VERBOSE=false
+for arg in "$@"; do
+    case $arg in
+        --verbose)
+            VERBOSE=true
+            shift
+            ;;
+    esac
+done
+
 # Comprehensive list of source code file extensions to process
 SOURCE_EXTENSIONS=(
     # C and C++ family
@@ -74,20 +85,68 @@ for ext in "${SOURCE_EXTENSIONS[@]}"; do
     fi
 done
 
-# Find all source files and remove trailing spaces
-eval "find . -type f \( $FIND_PATTERN \) -print0" | 
-    while IFS= read -r -d $'\0' file; do
-        # Skip binary files (quick check)
-        if file "$file" | grep -q "text"; then
-            echo "Processing: $file"
-            # Remove trailing whitespace and preserve file timestamp
-            temp_file=$(mktemp)
-            sed 's/[[:space:]]*$//' "$file" > "$temp_file"
-            touch -r "$file" "$temp_file"  # Preserve timestamp
+# Counter for processed and modified files
+TOTAL_PROCESSED=0
+TOTAL_MODIFIED=0
+TOTAL_SHEBANGS=0
+
+# Process all files with recognized extensions
+process_file() {
+    local file="$1"
+    # Skip binary files (quick check)
+    if file "$file" | grep -q "text"; then
+        TOTAL_PROCESSED=$((TOTAL_PROCESSED + 1))
+
+        # Create a temp file to check if trailing spaces exist
+        temp_file=$(mktemp)
+        sed 's/[[:space:]]*$//' "$file" > "$temp_file"
+
+        # Compare original and processed files to see if they differ
+        if ! cmp -s "$file" "$temp_file"; then
+            echo "Removing trailing spaces: $file"
+            TOTAL_MODIFIED=$((TOTAL_MODIFIED + 1))
+
+            # Preserve timestamp
+            touch -r "$file" "$temp_file"
             mv "$temp_file" "$file"
         else
+            # No trailing spaces found
+            if $VERBOSE; then
+                echo "Skipping (no trailing spaces): $file"
+            fi
+            rm "$temp_file"
+        fi
+    else
+        # Binary file
+        if $VERBOSE; then
             echo "Skipping binary file: $file"
+        fi
+    fi
+}
+
+# Find files by extension and process them
+eval "find . -type f \( $FIND_PATTERN \) -print0" |
+    while IFS= read -r -d $'\0' file; do
+        process_file "$file"
+    done
+
+# Find files with shebang
+find . -type f -not -path "*/\.*" -not -path "*/node_modules/*" -perm -u+x -exec grep -l "^#!" {} \; |
+    while IFS= read -r file; do
+        # Check if this file has already been processed (has a known extension)
+        already_processed=false
+        for ext in "${SOURCE_EXTENSIONS[@]}"; do
+            if [[ "$file" == *.$ext ]]; then
+                already_processed=true
+                break
+            fi
+        done
+
+        # If not already processed, handle it now
+        if ! $already_processed; then
+            TOTAL_SHEBANGS=$((TOTAL_SHEBANGS + 1))
+            process_file "$file"
         fi
     done
 
-echo "All trailing spaces have been removed from source code files."
+echo "Summary: Processed $TOTAL_PROCESSED files with extensions, found $TOTAL_SHEBANGS shebang scripts without extensions, modified $TOTAL_MODIFIED files with trailing spaces."
